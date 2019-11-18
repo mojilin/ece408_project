@@ -74,7 +74,6 @@ void forward<gpu, float>(mshadow::Tensor<gpu, 4, float> &y, const mshadow::Tenso
     dim3 blockDim(TILE_WIDTH, TILE_WIDTH, 1);
     dim3 gridDim(B, M, Z);
 
-    const int K = k.shape_[3];
     cudaMemcpyToSymbol(const_weight, k.dptr_, sizeof(float) * M * C * K * K);
 
     // Call the kernel
