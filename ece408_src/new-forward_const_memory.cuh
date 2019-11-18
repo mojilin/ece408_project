@@ -74,10 +74,10 @@ void forward<gpu, float>(mshadow::Tensor<gpu, 4, float> &y, const mshadow::Tenso
     dim3 blockDim(TILE_WIDTH, TILE_WIDTH, 1);
     dim3 gridDim(B, M, Z);
 
-    cudaMemcpyToSymbol(const_weight, k.dptr_, sizeof(float) * M * C * K * K);
+    cudaMemcpyToSymbol(const_weight, w.dptr_, sizeof(float) * M * C * K * K);
 
     // Call the kernel
-    forward_kernel<<<gridDim, blockDim, 0>>>(y.dptr_,x.dptr_,w.dptr_, B,M,C,H,W,K);
+    forward_kernel<<<gridDim, blockDim, 0>>>(y.dptr_,x.dptr_, B,M,C,H,W,K);
 
     // Use MSHADOW_CUDA_CALL to check for CUDA runtime errors.
     MSHADOW_CUDA_CALL(cudaDeviceSynchronize());
@@ -97,3 +97,4 @@ void forward(mshadow::Tensor<gpu, 4, DType> &y, const mshadow::Tensor<gpu, 4, DT
 }
 
 #endif
+
