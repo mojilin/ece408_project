@@ -3,7 +3,7 @@
 
 #include <mxnet/base.h>
 #define TILE_WIDTH 16
-#define CONST_MEM_SIZE 20000
+#define CONST_MEM_SIZE 15000
 namespace mxnet
 {
 namespace op
@@ -11,7 +11,7 @@ namespace op
 
 __constant__ float const_weight[CONST_MEM_SIZE];
 
-__global__ void forward_kernel(float *y, const float *x, const float *w, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void forward_kernel(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     const int H_out = H - K + 1;
