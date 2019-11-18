@@ -11,7 +11,7 @@ namespace op
 
 __constant__ float const_weight[CONST_MEM_SIZE];
 
-__global__ void forward_kernel(float *y, const float *x, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void forward_kernel(float *y, const float *x, const float *w, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     const int H_out = H - K + 1;
@@ -77,7 +77,7 @@ void forward<gpu, float>(mshadow::Tensor<gpu, 4, float> &y, const mshadow::Tenso
     cudaMemcpyToSymbol(const_weight, w.dptr_, sizeof(float) * M * C * K * K);
 
     // Call the kernel
-    forward_kernel<<<gridDim, blockDim, 0>>>(y.dptr_,x.dptr_, B,M,C,H,W,K);
+    forward_kernel<<<gridDim, blockDim, 0>>>(y.dptr_,x.dptr_, w.dptr_, B,M,C,H,W,K);
 
     // Use MSHADOW_CUDA_CALL to check for CUDA runtime errors.
     MSHADOW_CUDA_CALL(cudaDeviceSynchronize());
