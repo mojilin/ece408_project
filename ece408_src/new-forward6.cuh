@@ -32,6 +32,11 @@ __global__ void forward_kernel(float *y, const float *x, const float *k, const i
     int tx = threadIdx.x;
     int ty = threadIdx.y;
 
+    /*extern __shared__ float shared_mem_ext[];
+    float *shared_mem = &shared_mem_ext[0];
+    float *shared_mem2 = &shmem[block_size * block_size];
+    float *temp;*/
+
     extern __shared__ float shmem[];
     float* X_shared1 = &shmem[0];
     float* W_shared1 = &shmem[input_tile_width * input_tile_width];
@@ -57,32 +62,12 @@ __global__ void forward_kernel(float *y, const float *x, const float *k, const i
         }
         __syncthreads();
 
-        acc += X_shared1[(threadIdx.x + 0) * input_tile_width + threadIdx.y + 0] * W_shared1[0 * K + 0]
-        + X_shared1[(threadIdx.x + 0) * input_tile_width + threadIdx.y + 1] * W_shared1[0 * K + 1]
-        + X_shared1[(threadIdx.x + 0) * input_tile_width + threadIdx.y + 2] * W_shared1[0 * K + 2]
-        + X_shared1[(threadIdx.x + 0) * input_tile_width + threadIdx.y + 3] * W_shared1[0 * K + 3]
-        + X_shared1[(threadIdx.x + 0) * input_tile_width + threadIdx.y + 4] * W_shared1[0 * K + 4]
-        + X_shared1[(threadIdx.x + 1) * input_tile_width + threadIdx.y + 0] * W_shared1[0 * K + 0]
-        + X_shared1[(threadIdx.x + 1) * input_tile_width + threadIdx.y + 1] * W_shared1[0 * K + 1]
-        + X_shared1[(threadIdx.x + 1) * input_tile_width + threadIdx.y + 2] * W_shared1[0 * K + 2]
-        + X_shared1[(threadIdx.x + 1) * input_tile_width + threadIdx.y + 3] * W_shared1[0 * K + 3]
-        + X_shared1[(threadIdx.x + 1) * input_tile_width + threadIdx.y + 4] * W_shared1[0 * K + 4]
-        + X_shared1[(threadIdx.x + 2) * input_tile_width + threadIdx.y + 0] * W_shared1[0 * K + 0]
-        + X_shared1[(threadIdx.x + 2) * input_tile_width + threadIdx.y + 1] * W_shared1[0 * K + 1]
-        + X_shared1[(threadIdx.x + 2) * input_tile_width + threadIdx.y + 2] * W_shared1[0 * K + 2]
-        + X_shared1[(threadIdx.x + 2) * input_tile_width + threadIdx.y + 3] * W_shared1[0 * K + 3]
-        + X_shared1[(threadIdx.x + 2) * input_tile_width + threadIdx.y + 4] * W_shared1[0 * K + 4]
-        + X_shared1[(threadIdx.x + 3) * input_tile_width + threadIdx.y + 0] * W_shared1[0 * K + 0]
-        + X_shared1[(threadIdx.x + 3) * input_tile_width + threadIdx.y + 1] * W_shared1[0 * K + 1]
-        + X_shared1[(threadIdx.x + 3) * input_tile_width + threadIdx.y + 2] * W_shared1[0 * K + 2]
-        + X_shared1[(threadIdx.x + 3) * input_tile_width + threadIdx.y + 3] * W_shared1[0 * K + 3]
-        + X_shared1[(threadIdx.x + 3) * input_tile_width + threadIdx.y + 4] * W_shared1[0 * K + 4]
-        + X_shared1[(threadIdx.x + 4) * input_tile_width + threadIdx.y + 0] * W_shared1[0 * K + 0]
-        + X_shared1[(threadIdx.x + 4) * input_tile_width + threadIdx.y + 1] * W_shared1[0 * K + 1]
-        + X_shared1[(threadIdx.x + 4) * input_tile_width + threadIdx.y + 2] * W_shared1[0 * K + 2]
-        + X_shared1[(threadIdx.x + 4) * input_tile_width + threadIdx.y + 3] * W_shared1[0 * K + 3]
-        + X_shared1[(threadIdx.x + 4) * input_tile_width + threadIdx.y + 4] * W_shared1[0 * K + 4];
-        
+        for(p=0; p<K; p++){
+            for (q = 0; q < K; q++){
+                acc += X_shared1[(threadIdx.x + p) * input_tile_width + threadIdx.y + q] * W_shared1[p * K + q];
+            }
+        }
+
         X_temp = X_shared1;
         X_shared1 = X_shared2;
         X_shared2 = X_temp;
